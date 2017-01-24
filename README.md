@@ -1,7 +1,6 @@
 # Foto-Webcam.eu Downloader
 
-
-A python script that can be used to download best-of images from any 'foto-webcam.eu' webcam. 
+A python script for downloading best-of images from 'foto-webcam.eu'. 
 
 Foto-Webcam.eu produces some great high-res photos and the community is marking the best ones. However, manually downloading them was too tedious so I wrote this script. 
 
@@ -14,6 +13,8 @@ I use it for downloading 'https://www.foto-webcam.eu/webcam/traunstein/' and usi
 ```
 
 You can blacklist fotos by simply deleting it from the download folder; next time you invoke the downloader the deleted file will be added to the blacklist and not downloaded again.
+
+To download from a different cam you can just modify the url in the script itself.
 
 ## Sample Output
 
