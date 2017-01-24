@@ -1,0 +1,90 @@
+from lxml import html
+from lxml import etree
+import json
+import requests
+import urllib
+import os
+import argparse
+
+###
+### Downloads images from traunstein webcam. Skips download of existing files. Ignores images in blacklist file.
+###
+
+
+parser = argparse.ArgumentParser(description="Downloads bestof images from Traunstein webcam")
+parser.add_argument('--path', help='where to save the images')
+
+args = parser.parse_args()
+
+resolution = "_hu"
+extension = ".jpg"
+url = "http://www.foto-webcam.eu/webcam/traunstein/"
+targetpath= os.dirname(args.path) if args.path else os.getcwd()
+blacklistpath = os.path.join(targetpath, "blacklist")
+fileslistpath = os.path.join(targetpath, "fileslist")
+
+
+
+imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=traunstein&bestof=1")
+images = json.loads(imagelist.text)
+
+bestoflist = images['bestof']
+
+with open(blacklistpath) as f:
+	blacklist = f.read().splitlines()
+
+with open(fileslistpath) as f:
+	addToBlackList = f.read().splitlines()
+
+
+for f in os.listdir(targetpath):
+	if f in addToBlackList:
+		addToBlackList.remove(f)
+
+blacklist = blacklist + addToBlackList
+
+    
+downloaded = 0
+blacklisted = 0
+existing = 0
+    
+downloadlist = []
+for i in bestoflist:
+    imagename = i + resolution + extension
+    imageurl = url + imagename
+    filename = imagename.replace("/", "-")
+    filepath = os.path.join(targetpath, filename)
+    
+    print "checking %s:" % imagename
+    
+    if os.path.isfile(filepath):
+        print "\talready exists!"
+	downloadlist.append(filename)
+        existing = existing + 1
+    elif filename in blacklist:
+        print "\tblacklisted!"
+        blacklisted = blacklisted + 1
+    else:
+        print "\tdownloading..."
+        urllib.urlretrieve(imageurl, filepath)
+	downloadlist.append(filename)
+        downloaded = downloaded + 1
+        print "\tdone"
+
+
+with open(os.path.join(targetpath, 'fileslist'), 'w') as f:
+	f.write("\n".join(downloadlist))
+
+with open(blacklistpath, 'w') as f:
+	f.write("\n".join(blacklist))
+
+print ""
+print "-" * 50
+print "BestOf imgs available:\t%d" % len(bestoflist)
+print "-" * 50
+print "Downloaded: \t\t%d" % downloaded
+print "Ignored: \t\t%d (blacklist: %d, existing: %d)" % (blacklisted + existing, blacklisted, existing)
+if len(addToBlackList) > 0:
+	print "Added to blacklist: \t%d" % len(addToBlackList)
+	print "\t%s" % str(addToBlackList) 
+print "-" * 50
