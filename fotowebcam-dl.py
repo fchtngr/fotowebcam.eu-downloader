@@ -8,11 +8,11 @@ import argparse
 import sys
 
 ###
-### Downloads images from traunstein webcam. Skips download of existing files. Ignores images in blacklist file.
+### Downloads images from a fotowebcam.eu webcam. 
 ###
 
 
-parser = argparse.ArgumentParser(description="Downloads bestof images from Traunstein webcam")
+parser = argparse.ArgumentParser(description="Downloads bestof images from a fotowebcam.eu webcam")
 parser.add_argument('webcam', help='the fotowebcam name')
 parser.add_argument('--path', help='where to save the images, default is cwdir')
 

@@ -12,7 +12,7 @@ I use it for downloading 'https://www.foto-webcam.eu/webcam/traunstein/' and usi
 $ python fotowebcam-dl.py -h
 usage: fotowebcam-dl.py [-h] [--path PATH] webcam
 
-Downloads bestof images from Traunstein webcam
+Downloads bestof images from a fotowebcam.eu webcam
 
 positional arguments:
   webcam       the fotowebcam name
@@ -20,7 +20,6 @@ positional arguments:
 optional arguments:
   -h, --help   show this help message and exit
   --path PATH  where to save the images, default is cwdir
-
 ```
 
 You can blacklist fotos by simply deleting it from the download folder; next time you invoke the downloader the deleted file will be added to the blacklist and not downloaded again.
