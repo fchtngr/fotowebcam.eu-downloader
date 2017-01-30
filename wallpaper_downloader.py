@@ -5,6 +5,7 @@ import requests
 import urllib
 import os
 import argparse
+import sys
 
 ###
 ### Downloads images from traunstein webcam. Skips download of existing files. Ignores images in blacklist file.
@@ -12,20 +13,25 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="Downloads bestof images from Traunstein webcam")
-parser.add_argument('--path', help='where to save the images')
+parser.add_argument('webcam', help='the fotowebcam name')
+parser.add_argument('--path', help='where to save the images, default is cwdir')
+
+if len(sys.argv)==1:
+    parser.print_help()
+    sys.exit(1)
 
 args = parser.parse_args()
 
 resolution = "_hu"
 extension = ".jpg"
-url = "http://www.foto-webcam.eu/webcam/traunstein/"
+url = "http://www.foto-webcam.eu/webcam/%s" % args.webcam	
 targetpath= os.dirname(args.path) if args.path else os.getcwd()
 blacklistpath = os.path.join(targetpath, "blacklist")
 fileslistpath = os.path.join(targetpath, "fileslist")
 
 
 
-imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=traunstein&bestof=1")
+imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 images = json.loads(imagelist.text)
 
 bestoflist = images['bestof']
