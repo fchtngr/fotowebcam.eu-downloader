@@ -9,7 +9,18 @@ I use it for downloading 'https://www.foto-webcam.eu/webcam/traunstein/' and usi
 ## Usage
 
 ```
-> python wallpaper_downloader.py
+$ python fotowebcam-dl.py -h
+usage: fotowebcam-dl.py [-h] [--path PATH] webcam
+
+Downloads bestof images from Traunstein webcam
+
+positional arguments:
+  webcam       the fotowebcam name
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --path PATH  where to save the images, default is cwdir
+
 ```
 
 You can blacklist fotos by simply deleting it from the download folder; next time you invoke the downloader the deleted file will be added to the blacklist and not downloaded again.
@@ -19,7 +30,7 @@ To download from a different cam you can just modify the url in the script itsel
 ## Sample Output
 
 ```
-> python wallpaper_downloader.py
+> python fotowebcam-dl.py traunstein
 checking 2017/01/20/0840_hu.jpg:
         downloading...
         done
