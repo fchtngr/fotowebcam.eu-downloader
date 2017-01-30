@@ -22,9 +22,7 @@ optional arguments:
   --path PATH  where to save the images, default is cwdir
 ```
 
-You can blacklist fotos by simply deleting it from the download folder; next time you invoke the downloader the deleted file will be added to the blacklist and not downloaded again.
-
-To download from a different cam you can just modify the url in the script itself.
+You can blacklist fotos by simply deleting it from the download folder (not all best-of fotos are really the "best" ;)). Next time you invoke the downloader the deleted file will be added to the blacklist.
 
 ## Sample Output
 
