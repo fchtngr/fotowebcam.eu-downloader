@@ -24,22 +24,25 @@ args = parser.parse_args()
 
 resolution = "_hu"
 extension = ".jpg"
-url = "http://www.foto-webcam.eu/webcam/%s" % args.webcam	
+url = ("http://www.foto-webcam.eu/webcam/%s/" % args.webcam)
+
+print url
+
 targetpath= os.dirname(args.path) if args.path else os.getcwd()
 blacklistpath = os.path.join(targetpath, "blacklist")
 fileslistpath = os.path.join(targetpath, "fileslist")
 
-
+print ("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 
 imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 images = json.loads(imagelist.text)
 
 bestoflist = images['bestof']
 
-with open(blacklistpath) as f:
+with open(blacklistpath, 'a+') as f:
 	blacklist = f.read().splitlines()
 
-with open(fileslistpath) as f:
+with open(fileslistpath, 'a+') as f:
 	addToBlackList = f.read().splitlines()
 
 
@@ -62,10 +65,11 @@ for i in bestoflist:
     filepath = os.path.join(targetpath, filename)
     
     print "checking %s:" % imagename
+    print imageurl
     
     if os.path.isfile(filepath):
         print "\talready exists!"
-	downloadlist.append(filename)
+        downloadlist.append(filename)
         existing = existing + 1
     elif filename in blacklist:
         print "\tblacklisted!"
@@ -73,7 +77,7 @@ for i in bestoflist:
     else:
         print "\tdownloading..."
         urllib.urlretrieve(imageurl, filepath)
-	downloadlist.append(filename)
+        downloadlist.append(filename)
         downloaded = downloaded + 1
         print "\tdone"
 
