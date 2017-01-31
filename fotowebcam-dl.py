@@ -11,7 +11,6 @@ import sys
 ### Downloads images from a fotowebcam.eu webcam. 
 ###
 
-
 parser = argparse.ArgumentParser(description="Downloads bestof images from a fotowebcam.eu webcam")
 parser.add_argument('webcam', help='the fotowebcam name')
 parser.add_argument('--path', help='where to save the images, default is cwdir')
@@ -26,12 +25,11 @@ resolution = "_hu"
 extension = ".jpg"
 url = ("http://www.foto-webcam.eu/webcam/%s/" % args.webcam)
 
-
 targetpath= os.dirname(args.path) if args.path else os.getcwd()
 blacklistpath = os.path.join(targetpath, "blacklist")
 fileslistpath = os.path.join(targetpath, "fileslist")
 
-print ("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
+#print ("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 
 imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 images = json.loads(imagelist.text)
@@ -50,7 +48,6 @@ for f in os.listdir(targetpath):
 		addToBlackList.remove(f)
 
 blacklist = blacklist + addToBlackList
-
     
 downloaded = 0
 blacklisted = 0
