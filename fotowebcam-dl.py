@@ -26,7 +26,6 @@ resolution = "_hu"
 extension = ".jpg"
 url = ("http://www.foto-webcam.eu/webcam/%s/" % args.webcam)
 
-print url
 
 targetpath= os.dirname(args.path) if args.path else os.getcwd()
 blacklistpath = os.path.join(targetpath, "blacklist")
@@ -65,7 +64,7 @@ for i in bestoflist:
     filepath = os.path.join(targetpath, filename)
     
     print "checking %s:" % imagename
-    print imageurl
+    #print imageurl
     
     if os.path.isfile(filepath):
         print "\talready exists!"
