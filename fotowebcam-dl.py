@@ -11,6 +11,9 @@ import sys
 ### Downloads images from a fotowebcam.eu webcam. 
 ###
 
+RESOLUTION = "_hu"
+EXTENSION = ".jpg"
+
 parser = argparse.ArgumentParser(description="Downloads bestof images from a fotowebcam.eu webcam")
 parser.add_argument('webcam', help='the fotowebcam name')
 parser.add_argument('--path', help='where to save the images, default is cwdir')
@@ -21,15 +24,11 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
-resolution = "_hu"
-extension = ".jpg"
-url = ("http://www.foto-webcam.eu/webcam/%s/" % args.webcam)
+URL = ("http://www.foto-webcam.eu/webcam/%s/" % args.webcam)
 
-targetpath= os.dirname(args.path) if args.path else os.getcwd()
+targetpath = os.dirname(args.path) if args.path else os.getcwd()
 blacklistpath = os.path.join(targetpath, "blacklist")
 fileslistpath = os.path.join(targetpath, "fileslist")
-
-#print ("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 
 imagelist = requests.get("http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1" % args.webcam)
 images = json.loads(imagelist.text)
@@ -41,7 +40,6 @@ with open(blacklistpath, 'a+') as f:
 
 with open(fileslistpath, 'a+') as f:
 	addToBlackList = f.read().splitlines()
-
 
 for f in os.listdir(targetpath):
 	if f in addToBlackList:
@@ -55,8 +53,9 @@ existing = 0
     
 downloadlist = []
 for i in bestoflist:
-    imagename = i + resolution + extension
-    imageurl = url + imagename
+    imagename = i + RESOLUTION + EXTENSION
+
+    imageurl = URL + imagename
     filename = imagename.replace("/", "-")
     filepath = os.path.join(targetpath, filename)
     
@@ -76,7 +75,6 @@ for i in bestoflist:
         downloadlist.append(filename)
         downloaded = downloaded + 1
         print "\tdone"
-
 
 with open(os.path.join(targetpath, 'fileslist'), 'w') as f:
 	f.write("\n".join(downloadlist))
