@@ -30,6 +30,7 @@ def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, ad
         print "Added to blacklist: \t%d" % len(added_to_blacklist)
         print "\t%s" % str(added_to_blacklist)
     print "-" * 75
+    sys.stdout.flush()
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -98,6 +99,7 @@ def download(name, bestoflist, cache):
             downloadlist.append(filename)
             nr_downloaded += 1
             print "\tdone"
+        sys.stdout.flush()
 
     cache["files"] = downloadlist
 
