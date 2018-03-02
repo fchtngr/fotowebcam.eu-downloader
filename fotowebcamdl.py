@@ -3,7 +3,7 @@ A script for downloading best-of images from www.fotowebcam.eu
 """
 import argparse
 import json
-import urllib
+import urllib.request as urllib
 import os
 import sys
 import requests
@@ -19,17 +19,17 @@ def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, ad
     """
     Print the result.
     """
-    print ""
-    print "-" * 75
-    print "# of best-of images:\t%d" % nr_bestofimages
-    print "-" * 75
-    print "Downloaded: \t\t%d" % nr_downloaded
-    print "Ignored: \t\t%d (blacklist: %d, existing: %d)" % (nr_blacklisted + nr_existing,
-                                                             nr_blacklisted, nr_existing)
+    print("")
+    print("-" * 75)
+    print("# of best-of images:\t%d" % nr_bestofimages)
+    print("-" * 75)
+    print("Downloaded: \t\t%d" % nr_downloaded)
+    print("Ignored: \t\t%d (blacklist: %d, existing: %d)" % (nr_blacklisted + nr_existing,
+                                                             nr_blacklisted, nr_existing))
     if len(added_to_blacklist) > 0:
-        print "Added to blacklist: \t%d" % len(added_to_blacklist)
-        print "\t%s" % str(added_to_blacklist)
-    print "-" * 75
+        print("Added to blacklist: \t%d" % len(added_to_blacklist))
+        print("\t%s" % str(added_to_blacklist))
+    print("-" * 75)
     sys.stdout.flush()
 
 def parse_args():
@@ -84,21 +84,21 @@ def download(name, bestoflist, cache):
         filename = imagename.replace("/", "-")
         filepath = os.path.join(PATH, filename)
 
-        print "checking %s:" % imagename
+        print("checking %s:" % imagename)
 
         if os.path.isfile(filepath):
-            print "\talready exists!"
+            print("\talready exists!")
             downloadlist.append(filename)
             nr_existing += 1
         elif filename in cache["blacklist"]:
-            print "\tblacklisted!"
+            print("\tblacklisted!")
             nr_blacklisted += 1
         else:
-            print "\tdownloading..."
+            print("\tdownloading...")
             urllib.urlretrieve(imageurl, filepath)
             downloadlist.append(filename)
             nr_downloaded += 1
-            print "\tdone"
+            print("\tdone")
         sys.stdout.flush()
 
     cache["files"] = downloadlist
