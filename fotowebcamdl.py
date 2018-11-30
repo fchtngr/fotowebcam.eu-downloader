@@ -7,6 +7,7 @@ import urllib.request as urllib
 import os
 import sys
 import requests
+from tqdm import tqdm
 
 IMAGE_URL_PATTERN = "http://www.foto-webcam.eu/webcam/%s/"
 BESTOF_URL_PATTERN = "http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1"
@@ -14,6 +15,12 @@ CACHE_PATH_PATTERN = ".%s_cache.json"
 RESOLUTION = "_hu"
 EXTENSION = ".jpg"
 PATH = os.getcwd()
+
+class TqdmUpTo(tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
 
 def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, added_to_blacklist):
     """
@@ -94,8 +101,8 @@ def download(name, bestoflist, cache):
             print("\tblacklisted!")
             nr_blacklisted += 1
         else:
-            print("\tdownloading...")
-            urllib.urlretrieve(imageurl, filepath)
+            with TqdmUpTo(unit='B', unit_scale=True, miniters=1) as t:
+                urllib.urlretrieve(imageurl, filepath,reporthook=t.update_to)
             downloadlist.append(filename)
             nr_downloaded += 1
             print("\tdone")
