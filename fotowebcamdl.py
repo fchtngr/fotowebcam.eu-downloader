@@ -40,7 +40,7 @@ def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, nr
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Downloads bestof images from a fotowebcam.eu webcam")
-    parser.add_argument('webcam', help='the fotowebcam name', nargs="*")
+    parser.add_argument('webcam', help='one or more webcam names', nargs="*")
     parser.add_argument('--path', help='where to save the images, default is cwdir')
 
     if len(sys.argv) == 1:
