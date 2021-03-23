@@ -9,9 +9,9 @@ import sys
 import requests
 from tqdm import tqdm
 
-IMAGE_URL_PATTERN = "http://www.foto-webcam.eu/webcam/%s/"
-BESTOF_URL_PATTERN = "http://www.foto-webcam.eu/webcam/include/list.php?img=&wc=%s&bestof=1"
-CACHE_PATH_PATTERN = ".%s_cache.json"
+IMAGE_URL_PATTERN = "http://www.foto-webcam.eu/webcam/{}/"
+BESTOF_URL_PATTERN = "http://www.foto-webcam.eu/webcam/include/thumb.php?wc={}&mode=bestof&page={}"
+BLACKLIST_PATH_PATTERN = ".{}.blacklist"
 RESOLUTION = "_hu"
 EXTENSION = ".jpg"
 PATH = os.getcwd()
@@ -22,7 +22,7 @@ class TqdmUpTo(tqdm):
             self.total = tsize
         self.update(b * bsize - self.n)
 
-def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, added_to_blacklist):
+def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, nr_failed):
     """
     Print the result.
     """
@@ -31,18 +31,16 @@ def print_result(nr_bestofimages, nr_downloaded, nr_blacklisted, nr_existing, ad
     print("# of best-of images:\t%d" % nr_bestofimages)
     print("-" * 75)
     print("Downloaded: \t\t%d" % nr_downloaded)
+    print("Failed: \t\t%d" % nr_failed)
     print("Ignored: \t\t%d (blacklist: %d, existing: %d)" % (nr_blacklisted + nr_existing,
                                                              nr_blacklisted, nr_existing))
-    if len(added_to_blacklist) > 0:
-        print("Added to blacklist: \t%d" % len(added_to_blacklist))
-        print("\t%s" % str(added_to_blacklist))
-    print("-" * 75)
+
     sys.stdout.flush()
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Downloads bestof images from a fotowebcam.eu webcam")
-    parser.add_argument('webcam', help='the fotowebcam name')
+    parser.add_argument('webcam', help='the fotowebcam name', nargs="*")
     parser.add_argument('--path', help='where to save the images, default is cwdir')
 
     if len(sys.argv) == 1:
@@ -56,21 +54,27 @@ def parse_args():
 
     return args
 
-def write_cache(name, cache):
-    cache_file = os.path.join(PATH, (CACHE_PATH_PATTERN % name))
-    with open(cache_file, 'w') as cache_file:
-        cache_file.write(json.dumps(cache))
-
-def read_cache(name):
-    cache_file = os.path.join(PATH, (CACHE_PATH_PATTERN % name))
-    with open(cache_file, 'r') as cache_file:
-        cache = json.loads(cache_file.read())
-    return cache
+def read_blacklist(name):
+    blacklist_file = os.path.join(PATH, BLACKLIST_PATH_PATTERN.format(name))
+    if os.path.exists(blacklist_file):
+        with open(blacklist_file, 'r') as blacklist:
+            return blacklist.read().splitlines()
+    else:
+        return []
 
 def load_imagelist(name):
-    imagelist = requests.get(BESTOF_URL_PATTERN % name)
-    images = json.loads(imagelist.text)
-    return images['bestof']
+    page = 0
+    imgs = []
+
+    while True:
+        imagelist = requests.get(BESTOF_URL_PATTERN.format(name, page))
+        images = json.loads(imagelist.text)['images']
+        if len(images) <= 0:
+            break
+        imgs.extend(images)
+        page += 1
+
+    return imgs 
 
 def update_blacklist(cache):
     add_to_blacklist = list(cache["files"])
@@ -81,49 +85,48 @@ def update_blacklist(cache):
     cache["blacklist"].append(add_to_blacklist)
     return add_to_blacklist
 
-def download(name, bestoflist, cache):
-    nr_downloaded = nr_blacklisted = nr_existing = 0
-    downloadlist = []
+def download(name, bestoflist, blacklist):
+    nr_downloaded = nr_blacklisted = nr_existing = nr_failed = 0
     for i in bestoflist:
         imagename = i + RESOLUTION + EXTENSION
-        imageurl = (IMAGE_URL_PATTERN % name) + imagename
+        imageurl = IMAGE_URL_PATTERN.format(name) + imagename
 
         filename = imagename.replace("/", "-")
-        filepath = os.path.join(PATH, filename)
+        filepath = os.path.join(PATH, "{}_{}".format(name, filename))
 
         print("checking %s:" % imagename)
 
-        if os.path.isfile(filepath):
-            print("\talready exists!")
-            downloadlist.append(filename)
-            nr_existing += 1
-        elif filename in cache["blacklist"]:
+        if filename in blacklist:
             print("\tblacklisted!")
             nr_blacklisted += 1
+        elif os.path.isfile(filepath):
+            print("\talready exists!")
+            nr_existing += 1
         else:
             with TqdmUpTo(unit='B', unit_scale=True, miniters=1) as t:
-                urllib.urlretrieve(imageurl, filepath,reporthook=t.update_to)
-            downloadlist.append(filename)
-            nr_downloaded += 1
-            print("\tdone")
+                try:
+                    urllib.urlretrieve(imageurl, filepath, reporthook=t.update_to)
+                    nr_downloaded += 1
+                    print("\tdone")
+                except:
+                    print("\tDownload failed!")
+                    nr_failed += 1
+            
         sys.stdout.flush()
 
-    cache["files"] = downloadlist
-
-    return (nr_downloaded, nr_blacklisted, nr_existing)
+    return (nr_downloaded, nr_blacklisted, nr_existing, nr_failed)
 
 def main():
     args = parse_args()
 
-    bestoflist = load_imagelist(args.webcam)
+    for webcam in args.webcam:
+        print("-" * 50)
+        print(webcam)
+        bestoflist = load_imagelist(webcam)
+        blacklist = read_blacklist(webcam)
 
-    cache = read_cache(args.webcam)
-    added_to_blacklist = update_blacklist(cache)
-
-    (nr_downloaded, nr_blacklisted, nr_existing) = download(args.webcam, bestoflist, cache)
-
-    write_cache(args.webcam, cache)
-    print_result(len(bestoflist), nr_downloaded, nr_blacklisted, nr_existing, added_to_blacklist)
+        (nr_downloaded, nr_blacklisted, nr_existing, nr_failed) = download(webcam, bestoflist, blacklist)
+        print_result(len(bestoflist), nr_downloaded, nr_blacklisted, nr_existing, nr_failed)
 
 if __name__ == "__main__":
     main()

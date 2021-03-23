@@ -1,4 +1,2 @@
 *.jpg
-blacklist
-fileslist
-.*cache.json
+*.blacklist
